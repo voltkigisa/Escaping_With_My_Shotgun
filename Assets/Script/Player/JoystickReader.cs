@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class JoystickReader : MonoBehaviour
 {
-    public static Vector2 RightStickValue;
-
-    public void OnStickMove(Vector2 input)
-    {
-        RightStickValue = input;
-    }
+    public static bool ShootPressed;
 
     public void OnStickRelease()
     {
-        RightStickValue = Vector2.zero;
+        ShootPressed = true;
     }
 }

@@ -3,12 +3,26 @@ using UnityEngine.InputSystem;
 
 public class CharacterMovement : MonoBehaviour
 {
+    private CharacterMovement movement;
+    private bool wasGrounded;
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float friction = 0.85f;
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+
+    public bool IsGrounded()
+    {
+        return Physics2D.OverlapCircle(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer
+        );
+    }
 
     void Awake()
     {
@@ -35,14 +49,19 @@ public class CharacterMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (moveInput.x != 0)
+        if (moveInput.x != 0 && IsGrounded())
         {
-            rb.velocity = new Vector2(moveInput.x * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(
+                moveInput.x * moveSpeed,
+                rb.velocity.y
+            );
         }
-        else
+        else if (IsGrounded())
         {
-            // Tambah friction saat tidak ada input
-            rb.velocity = new Vector2(rb.velocity.x * friction, rb.velocity.y);
+            rb.velocity = new Vector2(
+                rb.velocity.x * friction,
+                rb.velocity.y
+            );
         }
     }
 }

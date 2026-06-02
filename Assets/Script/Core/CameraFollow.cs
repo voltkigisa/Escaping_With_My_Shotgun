@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -9,44 +7,47 @@ public class CameraFollow : MonoBehaviour
     public float smoothSpeed = 5f;
     public Vector3 offset = new Vector3(0f, 0f, -10f);
 
-    [Header("Batas Kamera")]
-    public float minY = 0f;  // Batas bawah kamera (set sesuai level)
-
-    private float cameraHalfHeight;
+    private float startY;
     private float cameraHalfWidth;
+
+
 
     void Start()
     {
         Camera cam = Camera.main;
-        cameraHalfHeight = cam.orthographicSize;
         cameraHalfWidth = cam.orthographicSize * cam.aspect;
 
-        // Langsung snap kamera ke posisi karakter saat mulai
-        if (target != null)
-        {
-            Vector3 startPosition = target.position + offset;
-            startPosition.y = Mathf.Max(startPosition.y, minY);
-            transform.position = startPosition;
-        }
+        startY = transform.position.y;
     }
 
     void LateUpdate()
     {
         if (target == null) return;
 
-        // X kamera selalu 0, Y mengikuti karakter tapi hanya ke atas
-        float targetY = Mathf.Max(transform.position.y, target.position.y + offset.y);
+        float targetY = target.position.y + offset.y;
 
-        Vector3 targetPosition = new Vector3(0f, targetY, offset.z);
+        // Kamera tidak boleh lebih rendah dari posisi awal
+        targetY = Mathf.Max(targetY, startY);
 
-        // Smooth follow
-        transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+        Vector3 targetPosition = new Vector3(
+            0f,
+            targetY,
+            offset.z
+        );
 
-        // Clamp karakter agar tidak keluar kamera kiri/kanan
+        transform.position = Vector3.Lerp(
+            transform.position,
+            targetPosition,
+            smoothSpeed * Time.deltaTime
+        );
+
+        // Batasi player agar tidak keluar layar kiri/kanan
         Vector3 playerPos = target.position;
-        playerPos.x = Mathf.Clamp(playerPos.x,
+        playerPos.x = Mathf.Clamp(
+            playerPos.x,
             -cameraHalfWidth,
-            cameraHalfWidth);
+            cameraHalfWidth
+        );
         target.position = playerPos;
     }
 }
