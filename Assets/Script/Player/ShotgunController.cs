@@ -9,7 +9,7 @@ public class ShotgunController : MonoBehaviour
     [Header("Shotgun")]
     [SerializeField] private Transform shotgunPivot;
     [SerializeField] private float recoilForce = 15f;
-    [SerializeField] private float shootCooldown = 0.8f;
+    [SerializeField] private float shootCooldown = 0.2f;
 
     [Header("Peluru")]
     [SerializeField] private GameObject bulletPrefab;
@@ -59,11 +59,12 @@ public class ShotgunController : MonoBehaviour
                 aimDirection.x
             ) * Mathf.Rad2Deg;
 
-            shotgunPivot.rotation = Quaternion.Euler(
-                0,
-                0,
-                angle
-            );
+            // Kalau karakter menghadap kiri, balik angle
+            CharacterMovement charMovement = GetComponent<CharacterMovement>();
+            if (charMovement != null && !charMovement.IsFacingRight())
+                angle = 180 + angle;
+
+            shotgunPivot.rotation = Quaternion.Euler(0, 0, angle);
         }
 
         if (JoystickReader.ShootPressed)
@@ -87,7 +88,7 @@ public class ShotgunController : MonoBehaviour
     }
     private void StartReload()
     {
-        if (!isReloading)
+        if (!isReloading && currentAmmo < maxAmmo) // tambah cek ammo
         {
             StartCoroutine(ReloadRoutine());
         }
@@ -108,10 +109,11 @@ public class ShotgunController : MonoBehaviour
 
             UpdateAmmoUI();
 
-            Debug.Log("Reload: " + currentAmmo);
+            //Debug.Log("Reload: " + currentAmmo);
         }
 
         isReloading = false;
+        SoundManager.Instance.PlayReload();
     }
 
     private void Shoot()
@@ -149,5 +151,6 @@ public class ShotgunController : MonoBehaviour
         }
 
         UpdateAmmoUI();
+        SoundManager.Instance.PlayShotgun();
     }
 }
